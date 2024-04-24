@@ -4,6 +4,7 @@
     "esModuleInterop": true,
     "noImplicitAny": true,
     "noEmitOnError": true,
+    "outDir": "./build",
   },
   "include": ["./src/**/*", "./server.ts"]
 }
