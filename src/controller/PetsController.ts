@@ -16,21 +16,16 @@ function geraId() {
 export default class PetController {
     constructor(private repository: PetRepository) {
     }
-    criaPet(req: Request, res: Response) {
+    async criaPet(req: Request, res: Response) {
       const { adotado, especie, dataDeNascimento, nome } = <PetEntity>req.body;
 
       if (!Object.values(EnumEspecie).includes(especie)) {
         return res.status(400).json({ error: "Especie inválida" });
       }
 
-      const novoPet = new PetEntity();
-      (novoPet.id = geraId());
-      (novoPet.adotado = adotado);
-      (novoPet.especie = especie);
-      (novoPet.dataDeNascimento = dataDeNascimento);
-      (novoPet.nome = nome);
-      //listaDePets.push(novoPet);
-      this.repository.criaPet(novoPet);
+      const novoPet = new PetEntity(nome, especie, dataDeNascimento, adotado);
+
+      await this.repository.criaPet(novoPet);
       return res.status(201).json(novoPet);
     }
 
@@ -39,18 +34,22 @@ export default class PetController {
       return res.status(200).json(listaDePets);
     }
 
-    atualizaPet(req: Request, res: Response) {
+    async atualizaPet(req: Request, res: Response) {
       const { id } = req.params;
-      const { nome, dataDeNascimento, especie, adotado } = req.body as TipoPet;
-      const pet = listaDePets.find((pet) => pet.id === Number(id));
-      if (!pet) {
-        return res.status(400).json({ mensagem: "Pet não encontrado" });
+      const { success, message } = await this.repository.atualizaPet(
+          Number(id),
+          req.body as PetEntity
+      );
+      // const { nome, dataDeNascimento, especie, adotado } = req.body as TipoPet;
+      // const pet = listaDePets.find((pet) => pet.id === Number(id));
+      if (!success) {
+        return res.status(404).json({ message });
       }
-      pet.nome = nome;
-      pet.dataDeNascimento = dataDeNascimento;
-      pet.especie = especie;
-      pet.adotado = adotado;
-      return res.status(200).json(pet);
+      // pet.nome = nome;
+      // pet.dataDeNascimento = dataDeNascimento;
+      // pet.especie = especie;
+      // pet.adotado = adotado;
+      return res.sendStatus(204);
     }
 
     deletaPet(req: Request, res: Response) {
